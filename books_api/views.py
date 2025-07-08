@@ -21,3 +21,14 @@ def get_books(request):
         return Response(serializer.data)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_publisher(request, publisher):
+    try:
+        books = Book.objects.get(publisher=publisher)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
