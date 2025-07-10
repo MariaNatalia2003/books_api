@@ -12,6 +12,7 @@ import json
 
 # Create your views here.
 
+# Return all books in the database
 @api_view(['GET'])
 def get_books(request):
     if request.method == 'GET':
@@ -22,13 +23,20 @@ def get_books(request):
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
+# Results with publisher added in the url
 @api_view(['GET'])
-def get_publisher(request, publisher):
-    try:
-        books = Book.objects.get(publisher=publisher)
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+def get_publisher(request):
+    publisher_name = request.GET.get('publisher')
 
-    if request.method == 'GET':
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data)
+    if not publisher_name:
+        return Response({'detail': 'Parâmetro "publisher" é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Filter the answers based in the publisher_name
+    # We can't use `get` because publisher isn't a primary key
+    books = Book.objects.filter(publisher=publisher_name)
+
+    if not books.exists():
+        return Response({'detail': 'Nenhum livro encontrado para essa editora.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = BookSerializer(books, many=True)
+    return Response(serializer.data)
