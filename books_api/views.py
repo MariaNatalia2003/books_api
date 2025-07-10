@@ -40,3 +40,19 @@ def get_publisher(request):
 
     serializer = BookSerializer(books, many=True)
     return Response(serializer.data)
+
+
+# POST to save a new book
+@api_view(['POST'])
+def post_new_book(request):
+    if request.method == 'POST':
+        new_book = request.data
+
+        serializer = BookSerializer(data=new_book)
+
+        # Verify if the data is valid
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
